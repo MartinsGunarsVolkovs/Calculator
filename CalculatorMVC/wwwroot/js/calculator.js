@@ -111,16 +111,39 @@ function submitCalculation() {
         body: JSON.stringify(data)
     })
         .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    if (errorData && typeof errorData === 'object') {
+                        let errorMessage = '';
+                        for (const key in errorData) {
+                            if (errorData.hasOwnProperty(key)) {
+                                errorMessage += ` ${errorData[key].join(', ')}`;
+                            }
+                        }
+                        throw new Error(errorMessage);
+                    } else {
+                        throw new Error('Network response was not ok.');
+                    }
+                });
+            }
             return response.json();
         })
         .then(data => {
             if (data.hasOwnProperty('value')) {
                 clearValues();
+                const errorMessage = document.querySelector('.error-message');
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
                 currentOperand = data.value;
                 updateDisplay();
+            } else {
+                throw new Error('Response does not contain the expected "value" key.');
             }
         })
         .catch(error => {
-            console.error(error);
+            console.error('There was a problem with the fetch operation:', error);
+            const errorMessage = document.querySelector('.error-message');
+            errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
         });
 }
