@@ -43,7 +43,9 @@ document.getElementById('btnCE').addEventListener('click', () => {
 });
 
 document.getElementById('btnEquals').addEventListener('click', () => {
-
+    if (currentValue !== '' && currentOperator !== '' && currentOperand !== '') {
+        submitCalculation();
+    }
 });
 
 document.getElementById('btnPlus').addEventListener('click', () => {
@@ -94,3 +96,31 @@ function clearValues() {
     updateDisplay();
 }
 
+function submitCalculation() {
+    const data = {
+        Action: currentOperator,
+        CurrentValue: parseFloat(currentValue),
+        Operand: parseFloat(currentOperand)
+    };
+
+    fetch('/Calculator/Calculate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            if (data.hasOwnProperty('value')) {
+                clearValues();
+                currentOperand = data.value;
+                updateDisplay();
+            }
+        })
+        .catch(error => {
+            console.error(error);
+        });
+}
