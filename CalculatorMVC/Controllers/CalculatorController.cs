@@ -1,4 +1,5 @@
-﻿using CalculatorMVC.Requests;
+﻿using CalculatorMVC.Interfaces;
+using CalculatorMVC.Requests;
 using CalculatorMVC.Responses;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +7,11 @@ namespace CalculatorMVC.Controllers
 {
     public class CalculatorController : Controller
     {
+        private readonly ICalculatorService _calculatorService;
+        public CalculatorController(ICalculatorService calculatorService)
+        {
+            _calculatorService = calculatorService;
+        }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -17,7 +23,7 @@ namespace CalculatorMVC.Controllers
         {
             if (ModelState.IsValid)
             {
-                return Ok(new CalculatorResultResponse { Value = 1.0});
+                return Ok(await _calculatorService.Calculate(request));
             }
             return BadRequest(ModelState);
         }
